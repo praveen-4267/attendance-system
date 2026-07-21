@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Reports{% endblock %}
+{% block content %}
+  <h1>Generate Attendance Report</h1>
+  <form method="POST">
+    <label>Start Date</label>
+    <input type="date" name="start_date" required>
+
+    <label>End Date</label>
+    <input type="date" name="end_date" required>
+
+    <label>Class / Section (optional — leave blank for all)</label>
+    <input type="text" name="class_name" placeholder="e.g. CSE-3A">
+
+    <br><br>
+    <button type="submit" class="btn primary">📥 Download Excel Report</button>
+  </form>
+  <p class="hint">
+    The report includes a per-date Present/Absent/Late matrix for every student,
+    plus total sessions attended and attendance % (rows below 75% are highlighted).
+  </p>
+{% endblock %}

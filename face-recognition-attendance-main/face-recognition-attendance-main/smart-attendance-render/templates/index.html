@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+  <h1>Dashboard</h1>
+  <div class="card-grid">
+    <div class="card">
+      <h2>{{ student_count }}</h2>
+      <p>Registered Students</p>
+    </div>
+    <div class="card">
+      <a href="{{ url_for('register') }}" class="btn">+ Register New Student</a>
+    </div>
+    <div class="card">
+      <a href="{{ url_for('mark_page') }}" class="btn">📷 Mark Attendance</a>
+    </div>
+    <div class="card">
+      <a href="{{ url_for('reports') }}" class="btn">📊 Generate Report</a>
+    </div>
+  </div>
+{% endblock %}

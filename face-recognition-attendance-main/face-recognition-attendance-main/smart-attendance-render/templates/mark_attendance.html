@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Mark Attendance{% endblock %}
+{% block content %}
+  <h1>Mark Attendance (Face Recognition)</h1>
+
+  <label>Class / Section</label>
+  <input type="text" id="class_name" placeholder="e.g. CSE-3A" value="Unassigned">
+  <label>Period</label>
+  <input type="text" id="period_label" placeholder="e.g. Period 1" value="default">
+
+  <br><br>
+  <video id="video" autoplay width="400" height="300"></video>
+  <canvas id="canvas" width="400" height="300" style="display:none;"></canvas>
+  <br>
+  <button id="startBtn" class="btn primary">▶ Start Scanning</button>
+  <button id="stopBtn" class="btn">⏹ Stop</button>
+
+  <div id="log"></div>
+
+  <script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    let intervalId = null;
+
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(stream => { video.srcObject = stream; });
+
+    async function scanFrame() {
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const imageData = canvas.toDataURL('image/jpeg');
+
+      const res = await fetch('/mark_attendance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          image_data: imageData,
+          class_name: document.getElementById('class_name').value,
+          period_label: document.getElementById('period_label').value
+        })
+      });
+      const data = await res.json();
+      if (data.message) {
+        const p = document.createElement('p');
+        p.innerText = new Date().toLocaleTimeString() + ' — ' + data.message;
+        document.getElementById('log').prepend(p);
+      }
+    }
+
+    document.getElementById('startBtn').onclick = () => {
+      if (!intervalId) intervalId = setInterval(scanFrame, 3000); // scan every 3s
+    };
+    document.getElementById('stopBtn').onclick = () => {
+      clearInterval(intervalId);
+      intervalId = null;
+    };
+  </script>
+{% endblock %}

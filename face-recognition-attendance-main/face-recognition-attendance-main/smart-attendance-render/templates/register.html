@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Register Student{% endblock %}
+{% block content %}
+  <h1>Register New Student</h1>
+  <form id="registerForm">
+    <label>Roll Number</label>
+    <input type="text" name="roll_number" id="roll_number" required>
+
+    <label>Full Name</label>
+    <input type="text" name="name" id="name" required>
+
+    <label>Email (optional)</label>
+    <input type="email" name="email" id="email">
+
+    <label>Class / Section</label>
+    <input type="text" name="class_name" id="class_name" placeholder="e.g. CSE-3A">
+
+    <label>Face Photo</label>
+    <video id="video" autoplay width="320" height="240"></video>
+    <canvas id="canvas" width="320" height="240" style="display:none;"></canvas>
+    <br>
+    <button type="button" id="captureBtn" class="btn">📸 Capture Photo</button>
+    <img id="preview" style="display:none; margin-top:10px; max-width:320px;">
+
+    <br><br>
+    <button type="submit" class="btn primary">Register Student</button>
+  </form>
+  <div id="result"></div>
+
+  <script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const preview = document.getElementById('preview');
+    let capturedImage = null;
+
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(stream => { video.srcObject = stream; })
+      .catch(err => { document.getElementById('result').innerText = 'Camera access denied: ' + err; });
+
+    document.getElementById('captureBtn').onclick = () => {
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      capturedImage = canvas.toDataURL('image/jpeg');
+      preview.src = capturedImage;
+      preview.style.display = 'block';
+    };
+
+    document.getElementById('registerForm').onsubmit = async (e) => {
+      e.preventDefault();
+      if (!capturedImage) {
+        document.getElementById('result').innerText = 'Please capture a photo first.';
+        return;
+      }
+      const formData = new FormData();
+      formData.append('roll_number', document.getElementById('roll_number').value);
+      formData.append('name', document.getElementById('name').value);
+      formData.append('email', document.getElementById('email').value);
+      formData.append('class_name', document.getElementById('class_name').value);
+      formData.append('image_data', capturedImage);
+
+      const res = await fetch('/register', { method: 'POST', body: formData });
+      const data = await res.json();
+      document.getElementById('result').innerText = data.message;
+    };
+  </script>
+{% endblock %}
