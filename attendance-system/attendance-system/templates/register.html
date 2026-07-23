@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Register Student{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="mb-4">Register New Student</h4>
+                <form method="POST" action="{{ url_for('register') }}">
+                    <div class="mb-3">
+                        <label class="form-label">Roll Number</label>
+                        <input type="text" name="roll" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Full Name</label>
+                        <input type="text" name="name" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Continue to Face Capture</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

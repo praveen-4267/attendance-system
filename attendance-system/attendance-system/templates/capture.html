@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Capture Face - {{ name }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <div class="card">
+            <div class="card-body text-center">
+                <h4>Capturing face for <span class="text-primary">{{ name }}</span> ({{ roll }})</h4>
+                <p class="text-muted">Look at the camera. Slowly turn your head left/right for varied samples.</p>
+
+                <div class="video-wrap">
+                    <video id="video" autoplay playsinline></video>
+                    <canvas id="canvas" style="display:none;"></canvas>
+                </div>
+
+                <div class="progress my-3" style="height: 25px;">
+                    <div id="progressBar" class="progress-bar bg-success" style="width:0%">0 / 25</div>
+                </div>
+
+                <p id="status" class="fw-bold"></p>
+
+                <button id="startBtn" class="btn btn-primary">Start Capture</button>
+                <a id="doneBtn" href="{{ url_for('index') }}" class="btn btn-success" style="display:none;">Finish &amp; Go to Dashboard</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const studentId = {{ student_id }};
+const TOTAL = 25;
+let count = 0;
+let capturing = false;
+
+const video = document.getElementById('video');
+const canvas = document.getElementById('canvas');
+const status = document.getElementById('status');
+const progressBar = document.getElementById('progressBar');
+const startBtn = document.getElementById('startBtn');
+const doneBtn = document.getElementById('doneBtn');
+
+navigator.mediaDevices.getUserMedia({ video: true })
+    .then(stream => { video.srcObject = stream; })
+    .catch(err => { status.innerText = "Camera access denied: " + err; });
+
+startBtn.addEventListener('click', () => {
+    if (capturing) return;
+    capturing = true;
+    startBtn.disabled = true;
+    status.innerText = "Capturing...";
+    captureLoop();
+});
+
+function captureLoop() {
+    if (count >= TOTAL) {
+        status.innerText = "Capture complete!";
+        startBtn.style.display = "none";
+        doneBtn.style.display = "inline-block";
+        return;
+    }
+    const ctx = canvas.getContext('2d');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    ctx.drawImage(video, 0, 0);
+    const imageData = canvas.toDataURL('image/jpeg', 0.8);
+
+    fetch('/capture_frame', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ student_id: studentId, image: imageData, index: count })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            count = data.count;
+            const pct = Math.round((count / TOTAL) * 100);
+            progressBar.style.width = pct + "%";
+            progressBar.innerText = count + " / " + TOTAL;
+            status.innerText = "Captured " + count + " images";
+        } else {
+            status.innerText = data.message;
+        }
+        setTimeout(captureLoop, 350);
+    })
+    .catch(() => { setTimeout(captureLoop, 350); });
+}
+</script>
+{% endblock %}

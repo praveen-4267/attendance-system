@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - Attendance System{% endblock %}
+{% block content %}
+<div class="row g-4">
+    <div class="col-md-4">
+        <div class="card stat-card text-center">
+            <div class="card-body">
+                <h6 class="text-muted">Registered Students</h6>
+                <h2>{{ student_count }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card text-center">
+            <div class="card-body">
+                <h6 class="text-muted">Marked Today</h6>
+                <h2>{{ today_count }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card text-center">
+            <div class="card-body">
+                <h6 class="text-muted">Model Status</h6>
+                <h2>{% if trained %}<span class="text-success">Trained ✔</span>{% else %}<span class="text-danger">Not Trained</span>{% endif %}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5 g-4">
+    <div class="col-md-4">
+        <div class="card action-card">
+            <div class="card-body text-center">
+                <h5>1. Register Student</h5>
+                <p class="text-muted">Add a student and capture face samples via webcam.</p>
+                <a href="{{ url_for('register') }}" class="btn btn-primary w-100">Register</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card action-card">
+            <div class="card-body text-center">
+                <h5>2. Train Model</h5>
+                <p class="text-muted">Train the recognizer on all captured face data.</p>
+                <form method="POST" action="{{ url_for('train') }}">
+                    <button type="submit" class="btn btn-warning w-100">Train Model</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card action-card">
+            <div class="card-body text-center">
+                <h5>3. Mark Attendance</h5>
+                <p class="text-muted">Recognize faces live and mark attendance.</p>
+                <a href="{{ url_for('attendance_page') }}" class="btn btn-success w-100">Start</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
